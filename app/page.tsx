@@ -69,18 +69,18 @@ interface GameState {
 }
 
 const GAME_CONFIG = {
-  gravity: 0.6,
-  jumpStrength: -15, // Increased from -12 to -15 for stronger jumps
-  gameSpeed: 3, // Increased from 2 to 3 for faster horizontal movement
+  gravity: 0.8, // Increased from 0.6 to 0.8 for faster falling
+  jumpStrength: -18, // Increased from -15 to -18 for stronger jumps
+  gameSpeed: 5, // Increased from 3 to 5 for much faster horizontal movement
   canvasWidth: 800,
   canvasHeight: 600,
   birdSize: 35,
   obstacleWidth: 80,
   obstacleGap: 200,
-  healthDecay: 0.08,
-  hungerDecay: 0.12,
-  energyDecay: 0.04,
-  happinessDecay: 0.06,
+  healthDecay: 0.12, // Increased from 0.08 to 0.12 for faster decay
+  hungerDecay: 0.18, // Increased from 0.12 to 0.18 for faster decay
+  energyDecay: 0.06, // Increased from 0.04 to 0.06 for faster decay
+  happinessDecay: 0.09, // Increased from 0.06 to 0.09 for faster decay
 }
 
 const COLLECTIBLE_TYPES = {
@@ -257,7 +257,7 @@ export default function EnhancedFlappyBird() {
           y: prev.bird.y + prev.bird.velocity,
           velocity: prev.bird.velocity + GAME_CONFIG.gravity,
           age: prev.bird.age + timeDelta,
-          wingPhase: prev.bird.wingPhase + 0.4, // Increased from 0.3 to 0.4 for faster wing flapping
+          wingPhase: prev.bird.wingPhase + 0.6, // Increased from 0.4 to 0.6 for even faster wing flapping
         }
 
         // Decay vital stats
@@ -335,7 +335,8 @@ export default function EnhancedFlappyBird() {
         }
 
         // Generate collectibles
-        if (Math.random() < 0.025) {
+        if (Math.random() < 0.04) {
+          // Increased from 0.025 to 0.04 for more frequent collectibles
           const collectibleTypes = Object.keys(COLLECTIBLE_TYPES) as Array<keyof typeof COLLECTIBLE_TYPES>
           const randomType = collectibleTypes[Math.floor(Math.random() * collectibleTypes.length)]
 
@@ -486,7 +487,8 @@ export default function EnhancedFlappyBird() {
       ctx.font = "24px Arial"
       ctx.textAlign = "center"
       ctx.fillStyle = "white"
-      ctx.fillText(obstacleType.icon, obstacle.x + GAME_CONFIG.obstacleWidth / 2, obstacle.topHeight + 35)
+      const obstacleIconText = obstacleType.icon || "⚠️"
+      ctx.fillText(obstacleIconText, obstacle.x + GAME_CONFIG.obstacleWidth / 2, obstacle.topHeight + 35)
     })
 
     // Draw enhanced collectibles
@@ -529,7 +531,8 @@ export default function EnhancedFlappyBird() {
       ctx.font = "20px Arial"
       ctx.textAlign = "center"
       ctx.fillStyle = "white"
-      ctx.fillText(collectibleType.icon, collectible.x, collectible.y + 7)
+      const iconText = collectibleType.icon || "?"
+      ctx.fillText(iconText, collectible.x, collectible.y + 7)
     })
 
     // Draw particles
@@ -681,11 +684,51 @@ export default function EnhancedFlappyBird() {
         event.preventDefault()
         jump()
       }
+
+      // Care item shortcuts
+      switch (event.code) {
+        case "KeyW":
+          event.preventDefault()
+          setCareItems((prev) => {
+            if (prev.food > 0 && gameState.bird.isAlive) {
+              useCareItem("food")
+            }
+            return prev
+          })
+          break
+        case "KeyA":
+          event.preventDefault()
+          setCareItems((prev) => {
+            if (prev.medicine > 0 && gameState.bird.isAlive) {
+              useCareItem("medicine")
+            }
+            return prev
+          })
+          break
+        case "KeyS":
+          event.preventDefault()
+          setCareItems((prev) => {
+            if (prev.energy > 0 && gameState.bird.isAlive) {
+              useCareItem("energy")
+            }
+            return prev
+          })
+          break
+        case "KeyD":
+          event.preventDefault()
+          setCareItems((prev) => {
+            if (prev.toys > 0 && gameState.bird.isAlive) {
+              useCareItem("toys")
+            }
+            return prev
+          })
+          break
+      }
     }
 
     window.addEventListener("keydown", handleKeyPress)
     return () => window.removeEventListener("keydown", handleKeyPress)
-  }, [jump])
+  }, [gameState, useCareItem])
 
   const getBirdStatus = () => {
     if (!gameState.bird.isAlive) return { emoji: "💀", text: "Dead", color: "text-red-400" }
@@ -915,7 +958,7 @@ export default function EnhancedFlappyBird() {
 
                       <div className="text-sm opacity-80 text-center">
                         <div className="font-semibold mb-1">🎮 Controls</div>
-                        <div>Click canvas or press SPACE to flap</div>
+                        <div>SPACE: Flap • W: Food • A: Medicine • S: Energy • D: Toys</div>
                       </div>
                     </div>
                   </div>
@@ -940,7 +983,7 @@ export default function EnhancedFlappyBird() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <Button
                     onClick={petBird}
                     disabled={!gameState.bird.isAlive}
@@ -973,25 +1016,26 @@ export default function EnhancedFlappyBird() {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-3">
                   {Object.entries(careItems).map(([type, count]) => {
+                    const disabled = count <= 0 || !gameState.bird.isAlive
                     return (
                       <motion.div key={type} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                         <Button
                           onClick={() => useCareItem(type as keyof typeof careItems)}
-                          disabled={count <= 0 || !gameState.bird.isAlive}
+                          disabled={disabled}
                           className={`w-full bg-gradient-to-r ${itemConfig[type].color} hover:brightness-110 text-white font-bold py-3 rounded-lg shadow-lg text-xs relative overflow-hidden`}
                         >
                           <div className="flex flex-col items-center">
                             <span className="text-lg mb-1">{itemConfig[type].icon}</span>
                             <span className="font-semibold">{itemConfig[type].label}</span>
-                            <Badge variant="outline" className="mt-1 border-white/50 bg-white/20 text-white text-xs">
-                              {count}
-                            </Badge>
-                          </div>
-                          {count <= 0 && (
-                            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                              <span className="text-white font-bold">Empty</span>
+                            <div className="flex items-center gap-1 mt-1">
+                              <Badge variant="outline" className="border-white/50 bg-white/20 text-white text-xs">
+                                {count}
+                              </Badge>
+                              <Badge variant="outline" className="border-white/30 bg-white/10 text-white text-xs">
+                                {type === "food" ? "W" : type === "medicine" ? "A" : type === "energy" ? "S" : "D"}
+                              </Badge>
                             </div>
-                          )}
+                          </div>
                         </Button>
                       </motion.div>
                     )

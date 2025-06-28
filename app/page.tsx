@@ -43,7 +43,6 @@ interface Collectible {
 
 interface Particle {
   id: string
-  id: number
   x: number
   y: number
   vx: number
@@ -71,8 +70,8 @@ interface GameState {
 
 const GAME_CONFIG = {
   gravity: 0.6,
-  jumpStrength: -15, // Increased from -12 to -15 for stronger jumps
-  gameSpeed: 3, // Increased from 2 to 3 for faster horizontal movement
+  jumpStrength: -12,
+  gameSpeed: 2,
   canvasWidth: 800,
   canvasHeight: 600,
   birdSize: 35,
@@ -207,7 +206,7 @@ export default function EnhancedFlappyBird() {
       bird: {
         ...prev.bird,
         velocity: GAME_CONFIG.jumpStrength,
-        energy: Math.max(0, prev.bird.energy - GAME_CONFIG.energyDecay * 12), // Reduced from 15 to 12
+        energy: Math.max(0, prev.bird.energy - GAME_CONFIG.energyDecay * 15),
       },
       particles: [...prev.particles, ...createParticles(prev.bird.x - 10, prev.bird.y + 15, "#60A5FA", 6)],
     }))
@@ -258,7 +257,7 @@ export default function EnhancedFlappyBird() {
           y: prev.bird.y + prev.bird.velocity,
           velocity: prev.bird.velocity + GAME_CONFIG.gravity,
           age: prev.bird.age + timeDelta,
-          wingPhase: prev.bird.wingPhase + 0.4, // Increased from 0.3 to 0.4 for faster wing flapping
+          wingPhase: prev.bird.wingPhase + 0.3,
         }
 
         // Decay vital stats

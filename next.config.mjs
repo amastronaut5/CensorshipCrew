@@ -12,15 +12,16 @@ const nextConfig = {
     unoptimized: true
   },
   assetPrefix: process.env.NODE_ENV === 'production' ? '' : '',
-  experimental: {
-    optimizeCss: true,
-  },
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
   poweredByHeader: false,
   generateEtags: false,
   compress: true,
+  // Remove experimental features that cause critters issues
+  experimental: {
+    // Remove optimizeCss and other experimental features
+  },
 }
 
 export default nextConfig

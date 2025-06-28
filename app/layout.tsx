@@ -47,14 +47,19 @@ export const metadata: Metadata = {
     description: "Your bird needs constant love and care to survive! Built for NodeForSpeed 1.0 hackathon.",
     images: ["/og-image.png"],
   },
-  viewport: "width=device-width, initial-scale=1",
   themeColor: "#3B82F6",
   manifest: "/manifest.json",
   icons: {
     icon: "/favicon.ico",
     apple: "/apple-touch-icon.png",
   },
-    generator: 'v0.dev'
+  generator: "v0.dev",
+  // Move viewport to metadata instead of separate export
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    themeColor: "#3B82F6",
+  },
 }
 
 export default function RootLayout({
@@ -65,9 +70,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#3B82F6" />
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <meta name="theme-color" content="#3B82F6" />
       </head>
       <body className={inter.className}>
         <main>{children}</main>

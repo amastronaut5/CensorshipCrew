@@ -43,7 +43,6 @@ interface Collectible {
 
 interface Particle {
   id: string
-  id: number
   x: number
   y: number
   vx: number
